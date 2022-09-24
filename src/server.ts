@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
@@ -33,12 +33,12 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
   // Root Endpoint
   // Displays a simple message to the user
-  app.get("/filteredimage", async (req, res) => {
-    const imageUrl = req.query.image_url
-    console.log('imageUrl', imageUrl)
-    const image = await filterImageFromURL(imageUrl)
-    res.send(image)
-  } );
+  app.get("/filteredimage", async (req: Request, res: Response): Promise<void> => {
+    const imageUrl: string = req.query.image_url
+    const image: string = await filterImageFromURL(imageUrl)
+    res.status(200).sendFile(image, () => deleteLocalFiles([image]));
+  }
+);
 
 
   // Start the Server
