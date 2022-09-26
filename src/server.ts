@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
-import {filterImageFromURL, deleteLocalFiles} from './util/util';
+import { filterImageFromURL, deleteLocalFiles } from './util/util';
 
 (async () => {
 
@@ -34,16 +34,26 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   // Root Endpoint
   // Displays a simple message to the user
   app.get("/filteredimage", async (req: Request, res: Response): Promise<void> => {
-    const imageUrl: string = req.query.image_url
-    const image: string = await filterImageFromURL(imageUrl)
-    res.status(200).sendFile(image, () => deleteLocalFiles([image]));
+    const imageUrl: string = req.query.image_url;
+    if (!imageUrl) res.status(400).json({
+      message: 'Invalid Image URL',
+    })
+    try {
+      const image: string = await filterImageFromURL(imageUrl);
+      res.status(200).sendFile(image, () => deleteLocalFiles([image]));
+    } catch ({ message }) {
+      res.status(415).json({
+        message: 'Error processing image',
+        error: message
+      })
+    }
   }
-);
+  );
 
 
   // Start the Server
-  app.listen( port, () => {
-      console.log( `server running http://localhost:${ port }` );
-      console.log( `press CTRL+C to stop server` );
-  } );
+  app.listen(port, () => {
+    console.log(`server running http://localhost:${port}`);
+    console.log(`press CTRL+C to stop server`);
+  });
 })();
